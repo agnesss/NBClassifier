@@ -8,20 +8,20 @@ import java.io.*;
 public class BayesClassifier {
 
 
+    //method used to train the algorithm
     public void train(String fileName){
 
         try {
             BufferedReader buf = new BufferedReader( new FileReader(new File(fileName)));
+            Utils.processInputHeader(buf.readLine());
             String line;
             while(!(line = buf.readLine()).equals("")){
 
                 String [] tokens = line.split(" ");
 
-                Utils.count(Utils.OUTLOOK, tokens[0], tokens[4]);
-                Utils.count(Utils.TEMPERATURE, tokens[1], tokens[4]);
-                Utils.count(Utils.HUMIDITY, tokens[2], tokens[4]);
-                Utils.count(Utils.WIND, tokens[3], tokens[4]);
-                Utils.count(Utils.DECISION, tokens[4], tokens[4]);
+                for(int i=0; i< tokens.length; i++){
+                    Utils.count(Utils.labels[i],tokens[i], tokens[tokens.length-1]);
+                }
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -31,13 +31,16 @@ public class BayesClassifier {
     }
 
 
-    public String test(String outlook, String humidity, String temperature, String wind){
+    //method used to test the algorithm with new input
+    //it calculates probabilities for both possible cases: yes or no
+    //which one is higher decides the result of classification
+    public String test(String [] params){
 
-        double yes = Utils.calculateProbability(outlook, humidity, temperature, wind, true);
-        System.out.println("Probability of YES is: "+yes);
-        double no = Utils.calculateProbability(outlook, humidity, temperature, wind, false);
-        System.out.println("Probability of NO is: "+no);
+        double probability1 = Utils.calculateProbability(params, true);
+        System.out.println("Probability of YES is: "+probability1);
+        double probability2 = Utils.calculateProbability(params, false);
+        System.out.println("Probability of NO is: "+probability2);
 
-        return yes > no ? "yes" : "no";
+        return probability1 > probability2 ? "yes" : "no";
     }
 }
